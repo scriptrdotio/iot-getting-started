@@ -1,5 +1,5 @@
-# Creatr Sample App
-The creatr sample app is meant to jump start your development with scriptr.io and any device you have. It's a complete end-to-end scenario that allows you to connect your device and view its live and historical data as you like.
+# IOT Getting started App
+The IOT Getting started App sample app is meant to jump start your development with scriptr.io and any device you have. It's a complete end-to-end scenario that allows you to connect your device and view its live and historical data as you like.
 
 # Features
 The creatr sample app can be used to serve different industries. So far, you can use the application in the context of a:
