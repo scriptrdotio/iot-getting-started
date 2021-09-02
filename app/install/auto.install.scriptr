@@ -4,16 +4,85 @@ var devices = require("device");
 var users = require("user");
 var groups = require("group");
 
+var config = require("../config/config");
 
-var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
-var inputData = typeof(body) == "string" ? JSON.parse(body) : body;
+
+/** Create a group editor that allows its users to access the scriptr ide plugins, ex: decision table **/
+var saveEditorGroup = groups.create("editor");
+if(saveEditorGroup.metadata.status == "failure"  && saveEditorGroup.metadata.errorCode != "DUPLICATE_GROUP_NAME"){
+    responseObject.failure.push("Create a group editor which allows its users to access the scriptr ide plugins when logged in to the app failed.");
+} else {
+     responseObject.success.push("The group editor which allows its users to access the scriptr ide plugins when logged in to the app is available.");
+}
+
+var dataChannel = "deviceDigest";
+
+/** Create Anonymous publish channel used to receive requests from browser **/
+var channelsList =  ["requestChannel", "responseChannel", dataChannel];
+var options = {
+  "subscribeACL": "authenticated",
+  "publishACL": "authenticated"
+}
+var saveChannel = null;
+channelsList.forEach(function(channel) {
+   saveChannel = channels.create(channel, options);
+});
+
+if(saveChannel.metadata.status == "failure" && saveChannel.metadata.errorCode !== "DUPLICATE_CHANNEL"){
+    responseObject.failure.push("Create application needed channels error. "+saveChannel.metadata.errorDetail);
+} else {
+    responseObject.success.push("Application needed channels \"requestChannel\" & \"responseChannel\" are available.");
+}
+
+
+var saveApplicationGroup = groups.create(config.applicationGroup);
+if(saveApplicationGroup.metadata.status == "failure" && saveApplicationGroup.metadata.errorCode != "DUPLICATE_GROUP_NAME"){
+    responseObject.failure.push("Failure to create a group \""+ config.applicationGroup +"\", which is used to identify authenticated applications sending on behalf of devices data to scriptr");
+} else {
+    responseObject.success.push("Group \""+ config.applicationGroup +"\", which is used to identify authenticated applications sending on behalf of devices data to scriptr is available.");
+}
+
+
+var saveDeviceGroup = groups.create(config.deviceGroup);
+if(saveDeviceGroup.metadata.status == "failure" && saveDeviceGroup.metadata.errorCode != "DUPLICATE_GROUP_NAME"){
+    responseObject.failure.push("Failure to create a group \""+ config.deviceGroup +"\" sending data directly to scriptr is available. "+saveDeviceGroup.metadata.errorDetail);
+} else {
+     responseObject.success.push("Group \""+ config.deviceGroup +"\" which allows to identify an authenticated device is sending data directly to scriptr is available.");
+}
+
+
+/** Setup account default domain if none is set **/
+var subdomain = request.account.accountKey;
+var params = {
+    "apsdb.name": subdomain
+}
+
+var saveSubdomain = apsdb.callApi("SaveSubdomain", params, null); 
+if(saveSubdomain.metadata.status == "failure" && saveSubdomain.metadata.errorCode != "MAX_SUBDOMAINS_EXCEEDED") {
+	responseObject.failure.push(JSON.stringify("Failed to generate a subdomain for your account under scriptrapps.io on which your APIs will be exposed. A subdomain is needed for the application to call your public APIs without passing the anonymous token. You can always set your account subdomain from the IDE \"Account\" tab."));
+} else if(saveSubdomain.metadata.status == "success" && saveSubdomain.metadata.errorCode != "MAX_SUBDOMAINS_EXCEEDED"){
+    responseObject.success.push(JSON.stringify("A subdomain was generated for your account under scriptrapps.io on which your APIs will be exposed. This will also allow users to call your public APIs without passing the anonymous token. You can always change your account subdomain from the IDE \"Account\" tab."));
+} 
+
+
 
 var configurationSettings = {"apsdb.optionalBindReferrer": "true"};
 var saveConfiguration = apsdb.callApi("SaveConfiguration", configurationSettings, null)
+
 if(saveConfiguration.metadata.status == "failure"){
    responseObject.failure.push("Setup account user tokens not bound to the referrer failed."+ saveConfiguration.metadata.errorDetail);
 } else {
     responseObject.success.push("Setup account user tokens not bound to the referrer is successful.");
+}
+
+
+var pubsub = require("pubsub");
+var topic = pubsub.getInstance("deviceDigest");
+var response = topic.subscribe("app/api/subscription/subscriber", "script");
+if(response.metadata.status == "failure" && response.metadata.errorCode != "CALLBACK_SUBSCRIBED") {
+     responseObject.failure.push("Failed to subscribe the script app/api/subscription/subscriber to the channel " + dataChannel + "." + response.metadata.errorDetail);
+} else {
+    responseObject.success.push("The script app/api/subscription/subscriber was successfully subscribed to ingest data from the channel " + dataChannel + ".");
 }
 
 
@@ -30,7 +99,6 @@ var usersList = [ //Device used to login to iot app
 
 usersList.forEach(function(params) {
   var saveUser= users.save(params);
-    
     if(saveUser.metadata.status == "failure"){
        responseObject.failure.push("Creating user/password to login to sample application. "+saveUser.metadata.errorDetail);
     } else {
@@ -39,14 +107,40 @@ usersList.forEach(function(params) {
 });
 
 
+//We should add these to a broker group
+var devicesList = [
+    { //This device can be used to authenticate the messaging of group of devices to scriptr example, used for the authentication with the mqtt bridge, or to add the messaging queue 
+        "id":"myDmpBroker",
+        "password" : "demo",
+        "name" : "myDmpBroker",
+        "deviceType": "default",
+        "groups": config.applicationGroup
+    },
+    { //This device is a sample device
+        "id":"myDevice",
+        "password" : "demo",
+        "name" : "My Device",
+        "deviceType": "default",
+        "groups": config.deviceGroup
+    },
+];
 
-var pubsub = require("pubsub");
-var topic = pubsub.getInstance(dataChannel);
-var response = topic.subscribe("app/api/subscription/subscriber", "script");
-if(response.metadata.status == "failure" && response.metadata.errorCode != "CALLBACK_SUBSCRIBED") {
-     responseObject.failure.push("Failed to subscribe the script app/api/subscription/subscriber to the channel " + dataChannel + "." + response.metadata.errorDetail);
-} else {
-    responseObject.success.push("The script app/api/subscription/subscriber was successfully subscribed to ingest data from the channel " + dataChannel + ".");
-}
+devicesList.forEach(function(params) {
+   	var saveDevice = devices.save(params);
+    if(saveDevice.metadata.status == "failure"){
+       responseObject.failure.push("Failed to create "+ params.id +" device. "+saveDevice.metadata.errorDetail);
+    } else {
+       responseObject.success.push("Create  "+ params.id +" device.");
+    }
+
+    var generateDeviceToken = devices.generateToken(params.id);
+    
+    if(generateDeviceToken.metadata.status == "failure"){
+       responseObject.failure.push("Failed to generate token for "+ params.id +" device. "+saveDevice.metadata.errorDetail);
+    } else {
+       responseObject.success.push("Generating a token for  "+ params.id +" device was successful.");
+    }
+});
+
 
 return responseObject;

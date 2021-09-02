@@ -3,6 +3,7 @@ var utils = require("../entities/utils");
 
 var documents = [];
 var devices = deviceManager.getAllDevicesDefinition();
+return devices
 if(devices) {
     for(var j = 0; j < devices.length; j++) {
         console.log(devices[j].id)

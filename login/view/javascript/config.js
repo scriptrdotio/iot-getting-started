@@ -1,18 +1,18 @@
 var config = {
-   redirect: "/smartfarming/app/view/html/index.html",
-   loginPage: "/smartfarming/login/view/login.html"
+   redirect: "/app/view/html/index.html",
+   loginPage: "/login/view/login.html"
 }
 
 var login = {
    expiry:6,
-   loginApi: "/smartfarming/login/api/login",
-   validateTokenApi: "/smartfarming/login/api/validateToken",
+   loginApi: "/login/api/login",
+   validateTokenApi: "/login/api/validateToken",
 };
 
 var forgotPassword = {
-    forgotPasswordApi: "/smartfarming/login/api/forgotPassword",
+    forgotPasswordApi: "/login/api/forgotPassword",
 }
 
 var resetPassword = {
-    resetPasswordApi: "/smartfarming/login/api/resetPassword",
+    resetPasswordApi: "/login/api/resetPassword",
 }

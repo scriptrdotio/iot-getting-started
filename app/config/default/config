@@ -1,5 +1,5 @@
-var jsonMapper = "app/config/waspmote/dataTransformation";
-//var hexMapper = "app/config/meshelium/wasp/payloadAdaptor";
+var jsonMapper = "app/config/default/dataTransformation";
+//var hexMapper = "app/config/default/payloadAdaptor";
 //var hexPayloadParam = "hexpayload"
 
 var deviceDataTopUp =  {
@@ -11,7 +11,7 @@ var deviceDataTopUp =  {
     "locationType": "Agriculture",
     "locationSection": "Farm",
     "physicalEnvironment": "Fields",
-    "sensor": "wasp",
-    "deviceType": "waspmote",
+    "sensor": "default",
+    "deviceType": "default",
     "source": "simulator"
 }

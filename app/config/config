@@ -10,7 +10,6 @@ var deviceTypes = {
 var deviceTypeField = "deviceType";
 
 var applicationGroup = "application";
-
 var deviceGroup = "device";
 
 var defaultApp = "smartfarming";

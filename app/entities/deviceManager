@@ -2,6 +2,8 @@ var document = require("document");
 var device = require("device");
 var utils = require("./utils");
 
+var config = require("../config/config");
+
 var _= require("modules/underscore/underscore.js")._;
 
 var log = require("log");
@@ -9,6 +11,7 @@ log.setLevel("INFO");
 
 var event_prefix = "device_event_";
 var type = "hardware";
+var deviceGroup = config.deviceGroup
 
 
 function getLatestDeviceEntry(id) {
@@ -72,6 +75,7 @@ function buildDeviceEventDocument(entry, data) {
     delete entry.versionNumber;
     delete entry.latest;
     delete entry.creator;
+    delete entry.groups;
     delete entry["apsdb.update"];
 
     entry["event_type"] = ["event"];
@@ -95,6 +99,7 @@ function buildDeviceDefinitionDocument(entry) {
     entry["id"] = entry.id;
     entry["password"] = utils.generate();
     entry["type"] = type;
+    entry["groups"] = deviceGroup;
     return entry;
 }
 
@@ -119,7 +124,7 @@ function getDeviceDefinition(id) {
 function getAllDevicesDefinition() {
 
    var params = {
-       "query" : "type =\""+ type +"\"",
+       "query" : "type =\""+ type +"\" or groups in [\""+config.deviceGroup+"\"]",
        "fields": "*"
    }
    
