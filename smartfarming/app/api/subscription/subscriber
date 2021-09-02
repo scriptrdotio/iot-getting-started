@@ -1,0 +1,93 @@
+var log = require("log"); 
+log.setLevel("info");
+
+var devices = require("device");
+var utils = require("../../entities/utils");
+var _ = require("modules/underscore/underscore.js")._;
+
+var deviceManager = require("../../entities/deviceManager");
+var deviceEvaluator = require("../../entities/deviceEvaluator");
+var devicePublisher = require("../../entities/devicePublisher");
+
+var config = require("../../config/config");
+
+var data = {};
+var deviceId = null;
+var dataMapping = {};
+log.info("[app/api/subscription/subscriber] received the following payload \n" + JSON.stringify(request));
+
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
+var inputData = typeof(body) == "string" ? JSON.parse(body) : body;
+
+var thisdevice  			=  request.user;
+var transformationScript	= thisdevice.transformationScript;
+
+log.info("thisdevice: "+thisdevice.id+" transformationScript: "+transformationScript);
+
+var deviceMapper 			= require(transformationScript);
+data 						= deviceMapper.mapIt(inputData); 
+
+data = _.omit(data, function(value, key, object) {
+     return _.isUndefined(value);
+});
+
+log.info("Transformed data: "+JSON.stringify(data));
+
+//Check if application sending data or device
+if(isIdInAcl(request.user.id, "group:"+config.applicationGroup)) { //If application
+    if(data.id) { //Device id should be in payload
+        deviceId = data.id; 
+    } else { //We are not able to identify the device from payload
+        log.info("[app/api/subscription/subscriber] Unable to identify device. Neither id in payload nor a valid device token.\n" + JSON.stringify(data));
+        return;
+	}
+} else if(isIdInAcl(request.user.id, "group:"+config.deviceGroup)) {
+    deviceId = request.user.id;
+    data.id = deviceId; //We have to map the id field to the actual deviceId
+}
+
+
+log.info("deviceId: "+deviceId);
+
+log.info("[app/api/subscription/subscriber] transform the payload into \n" + JSON.stringify(data));
+
+if(!_.isEmpty(data)) { 
+    try {
+        var deviceDefinition = deviceManager.getDeviceDefinition(deviceId);
+        log.info("Existing Device Definition: "+JSON.stringify(deviceDefinition))
+        log.info("Data to up: "+JSON.stringify(config.deviceDataTopUp))
+        if(deviceDefinition == null || (deviceDefinition.type != deviceManager.type)) {
+            var deviceDefinition = {};
+            
+            _.extend(config.deviceDataTopUp, utils.randomGeo({"lat": config.deviceDataTopUp.lat, "lng": config.deviceDataTopUp.long}, 2000));
+            
+            deviceDefinition = _.extend(config.deviceDataTopUp, data);
+            deviceDefinition.id = deviceDefinition.name = deviceId;
+            deviceDefinition = deviceManager.buildDeviceDefinitionDocument(deviceDefinition);
+            //Save device definition
+            log.info("[app/api/subscription/subscriber] Creating Device Definition: "+JSON.stringify(deviceDefinition))
+            var result = deviceManager.saveDeviceDefinition(deviceDefinition);
+        }
+        var entry = {};
+        entry = deviceManager.buildDeviceEventDocument(deviceDefinition, data);
+        log.info("[app/api/subscription/subscriber] Processing Event Entry: " + JSON.stringify(entry))	
+
+        return processEntry(entry);
+    }catch(exception) {
+        log.info("Exception: "+JSON.stringify(exception))
+        return exception;    
+    }
+} else {
+    log.info("[app/api/subscription/subscriber] No transformation found for data");
+    return;
+}
+
+
+function processEntry(entry) {
+    deviceEvaluator.evaluateDevice(entry)
+    deviceManager.saveDeviceEvent(entry);
+    devicePublisher.publishDevice(entry);
+}
+
+
+

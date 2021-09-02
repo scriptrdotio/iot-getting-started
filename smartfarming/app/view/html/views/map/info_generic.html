@@ -1,0 +1,103 @@
+<div ng-non-bindable="">
+    <section class="col-xs-12 pdt10 index-summary mrgb10">
+       <div class="col-xs-12 info-wrap"> 
+           <div class="col-xs-12 col-sm-3 text-center pdl0 pdr0" ng-if="marker.details.id.value">
+            <div class="icon bg-black" ng-bind-html="summaryIcons.id">
+            </div>							
+            <div class="nb bold">{{marker.details.id.value || "N/A"}}</div>
+            <small>Device Id</small>
+            </div>	
+            <div class="col-xs-12 col-sm-3 text-center" ng-if="marker.details.address.value">
+                <div class="icon bg-green" ng-bind-html="summaryIcons.address" >
+                </div>							
+                <div class="nb bold">{{marker.details.address.value || "N/A"}}</div>
+                <small>Address</small>
+            </div>							
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.locationType.value">
+                <div class="icon bg-orange" ng-bind-html="summaryIcons.locationType">
+                </div>							
+                <div class="nb bold">{{marker.details.locationType.value || "N/A"}}</div>
+                <small>Location Type</small>
+            </div>	
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.creationDate.value">
+                <div class="icon bg-blue" ng-bind-html="summaryIcons.time">
+                </div>
+                <div class="nb bold">{{(marker.details.creationDate.value | date:'MM/dd/yyyy hh:mm:ss') || "N/A"}}</div>
+            </div>  
+        </div>
+        <div class="clearfix mb10"></div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.sensor.value">
+                <div class="icon bg-yellow" ng-bind-html="summaryIcons.device">
+                </div>
+                <div class="nb bold">{{marker.details.sensor.value || "N/A"}}</div>
+                <small>Device</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.pressure.value">
+                <div class="icon bg-green" ng-bind-html="summaryIcons.pressure">
+                </div>
+                <div class="nb bold">{{marker.details.pressure.value || "N/A"}} {{marker.details.pressure_unit.value || "Pa"}}</div>
+                <small>Pressure</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.temperature.value">
+                <div class="icon bg-orange" ng-bind-html="summaryIcons.temperature">
+                </div>
+                <div class="nb bold">{{marker.details.temperature.value || "N/A"}} {{marker.details.temperature_unit.value || "&deg;C"}}</div>
+                <small>Temperature</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.humidity.value">
+                <div class="icon bg-blue" ng-bind-html="summaryIcons.humidity">
+                </div>
+                <div class="nb bold">{{marker.details.humidity.value || "N/A"}} {{marker.details.humidity_unit.value || "%"}}</div>
+                <small>Humidity</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.proximity.value">
+                <div class="icon bg-yellow" ng-bind-html="summaryIcons.proximity">
+                </div>
+                <div class="nb bold">{{marker.details.proximity.value || "N/A"}} {{marker.details.proximity_unit.value || "mm"}}</div>
+                <small>Proximity</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.acc_x.value">
+                <div class="icon bg-green" ng-bind-html="summaryIcons.accelerometer">
+                </div>
+                <div class="nb bold">{{marker.details.acc_x.value || "N/A"}}, {{marker.details.acc_y.value || "N/A"}}, {{marker.details.acc_z.value || "N/A"}} </div>
+                <small>Acceleration</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center" ng-if="marker.details.mag_x.value">
+                <div class="icon bg-orange" ng-bind-html="summaryIcons.magnetic">
+                </div>
+                <div class="nb bold">{{marker.details.mag_x.value || "N/A"}}, {{marker.details.mag_y.value || "N/A"}}, {{marker.details.mag_z.value || "N/A"}}</div>
+                <small>Magnetic</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.gyr_x.value">
+                <div class="icon bg-blue" ng-bind-html="summaryIcons.gyroscope">
+                </div>
+                <div class="nb bold">{{marker.details.gyr_x.value || "N/A"}} , {{marker.details.gyr_y.value || "N/A"}}, {{marker.details.gyr_z.value || "N/A"}}</div>
+                <small>Gyroscope</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center"  ng-if="marker.details.luminosity.value">
+                <div class="icon bg-blue" ng-bind-html="summaryIcons.luminosity">
+                </div>
+                <div class="nb bold">{{marker.details.luminosity.value || "N/A"}}  {{marker.details.luminosity_unit.value || "Lux"}} </div>
+                <small>Luminosity</small>
+            </div>
+        	<div class="col-xs-12 col-sm-3 text-center" ng-class="{'blink_me': (marker.details.co_triggered.value == 'true')}"  ng-if="marker.details.co_triggered.value == 'true' || marker.details.co_triggered.value == 'false' ">
+                <div class="icon" ng-class="{'bg-red': (marker.details.co_triggered.value == 'true'), 'bg-green': (marker.details.co_triggered.value == 'false')}"  ng-bind-html="summaryIcons.co_triggered">
+                </div>
+                <div class="nb bold" ng-if="marker.details.co_triggered.value == 'true'">Detected</div>
+                <div class="nb bold" ng-if="marker.details.co_triggered.value == 'false'">Undetected</div>
+                <small>CO</small>
+            </div>
+            <div class="col-xs-12 col-sm-3 text-center" ng-class="{'blink_me': (marker.details.gas_triggered.value == 'true')}"  ng-if="marker.details.gas_triggered.value == 'true' || marker.details.gas_triggered.value == 'false' ">
+                <div class="icon" ng-class="{'bg-red': (marker.details.gas_triggered.value == 'true'), 'bg-green': (marker.details.gas_triggered.value == 'false')}"  ng-bind-html="summaryIcons.gas_triggered">
+                </div>
+                <div class="nb bold" ng-if="marker.details.gas_triggered.value == 'true'">Detected</div>
+                <div class="nb bold" ng-if="marker.details.gas_triggered.value == 'false'">Undetected</div>
+                <small>Gas</small>
+            </div>
+    </section>
+    <section class="clear"></section>
+    <section class="btns-container">
+        <button type="button" ng-click='vm.go("/dashboard/deviceId/"+marker.details.id.value)' class="btn btn-default mt15 mrgr15" ng-cloak>View Dashboard</button>
+        <button type="button" ng-click='vm.go("/alerts/deviceId/"+marker.details.id.value)' class="btn btn-danger mt15" ng-cloak>View Alerts</button>
+    </section>
+</div>

@@ -1,0 +1,53 @@
+var expiry = 60;
+
+
+var applicationGroup = "application";
+var deviceGroup = "device";
+
+var defaultApp = "smartfarming";
+
+var businessRule = {"script": "smartfarming/app/entities/rules/decisionTable", "plugin": "SimpleDecisionTable"};
+
+var deviceDataTopUp =  {
+    "lat": 40.696472, 
+    "long": -74.2598743,
+    "address": "Brooklyn Grange",
+    "city": "Long Island",
+    "country": "United States",
+    "locationType": "Grange",
+    "locationSection": "Wheat Section",
+    "physicalEnvironment": "Granary-11",
+    "sensor": "B-L072Z-LRWAN1",
+    "source": "simulator"
+}
+
+var email = {
+    "TO": "",
+    "FROM": "Scriptr: Connected Device App",
+    "BODY": ""
+}
+
+var templates = {
+  mail: {
+      HIGH_TEMPERATURE: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: High Temperature!',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> sensor <%= id %> has high temperature of <%= temperature %>.'
+      },
+      LOW_TEMPERATURE: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Low Temperature!',
+        body: '<%= physicalEnvironment %> - <%= locationSection %> with <%= sensor %> sensor <%= id %> has low temperature of <%= temperature %>.'
+      },
+      HIGH_HUMIDITY: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: High Humidity!',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> sensor <%= id %> has high humidity of <%= humidity %>.'
+      },
+      LOW_HUMIDITY: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Low Humidity!',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> sensor <%= id %> has low humidity of <%= humidity %>.'
+      },
+      PROXIMITY_ALERT: {
+          subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Proximity Alert!',
+          body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> sensor <%= id %> has flagged a proximity alert with value <%= proximity %>.'
+      }
+  }
+}

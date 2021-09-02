@@ -1,0 +1,51 @@
+var document = require("document"); 
+var deviceManager = require("../entities/deviceManager");
+
+var devices = getAllDevicesDefinition();
+var documentsToDelete = []
+
+for(var j = 0; devices && j < devices.documents.length; j++) {
+    var entries = getDeviceHistoricalEntries(devices.documents[j].id,1)
+    if(entries) {
+        var pages = Math.ceil(entries.count/50)
+        for(var i = pages; i > 50; i--) {
+            var toDelete = getDeviceHistoricalEntries(devices.documents[j].id, pages);
+            for(var k = 0; k < toDelete.documents.length; k++){
+               document.delete(toDelete.documents[k].key);
+            }
+        }        
+    }
+}
+
+function getDeviceHistoricalEntries(id, page) {
+    var key = deviceManager.event_prefix + id;;
+   var params = {
+       "query" : "key like \""+key+"_%\"",
+       "fields": "key",
+       "count": true,
+       "pageNumber": page
+   }
+   
+   var result = document.query(params);
+   if(result.metadata.status == "success" && result.result.documents.length > 0) {
+        return result.result;
+   } else {
+        return null;
+   }
+}
+
+function getAllDevicesDefinition() {
+   //var key = deviceManager.definition_prefix;
+   var params = {
+       "query" : "source = \"simulator\"",
+       "count": true,
+       "fields": "key,id"
+   }
+   
+   var result = document.query(params);
+   if(result.metadata.status == "success" && result.result.documents.length > 0) {
+        return result.result;
+   } else {
+        return null;
+   }
+}
