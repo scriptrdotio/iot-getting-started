@@ -135,7 +135,7 @@ devicesList.forEach(function(params) {
 
     var generateDeviceToken = devices.generateToken(params.id);
     
-    if(generateDeviceToken.metadata.status == "failure"){
+    if(generateDeviceToken.metadata.status == "failure" && generateDeviceToken.metadata.errorCode !=  "TOO_MANY_TOKENS"){ 
        responseObject.failure.push("Failed to generate token for "+ params.id +" device. "+generateDeviceToken.metadata.errorDetail);
     } else {
        responseObject.success.push("Generating a token for  "+ params.id +" device was successful.");
