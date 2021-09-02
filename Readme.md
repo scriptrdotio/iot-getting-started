@@ -1,12 +1,8 @@
 # IOT Getting started App
-The IOT Getting started App sample app is meant to jump start your development with scriptr.io and any device you have. It's a complete end-to-end scenario that allows you to connect your device and view its live and historical data as you like.
+The IOT Getting Started app is meant to jump start your development with scriptr.io and any device you have. It's a complete end-to-end scenario that allows you to connect your device and view its live and historical data as you like.
 
 # Features
-The creatr sample app can be used to serve different industries. So far, you can use the application in the context of a:
-- Smart kitchen,
-- Live Stock fitbit,
-- Smart Container Cold chain.
-- Smart Farming
+The IOT Getting Started app can be used to serve different industries. 
 
 # Device Connection
 Devices have multiple options to connect to the application:
