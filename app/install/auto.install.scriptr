@@ -8,11 +8,23 @@ var groups = require("group");
 var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
 var inputData = typeof(body) == "string" ? JSON.parse(body) : body;
 
-var deviceId = inputData["deviceId"];
-var isPushPull = inputData["isPushPull"]?inputData["isPushPull"]:"push";
-var dataChannel = inputData["channel"]?inputData["channel"]:"Creatr";
-var usecase = inputData["usecase"]?inputData["usecase"]:"smartfarming";
 
+/** Create Anonymous publish channel used to receive requests from browser **/
+var channelsList =  ["requestChannel", "responseChannel"];
+var options = {
+  "subscribeACL": "anonymous",
+  "publishACL": "anonymous"
+}
+var saveChannel = null;
+channelsList.forEach(function(channel) {
+   saveChannel = channels.create(channel, options);
+});
+
+if(saveChannel.metadata.status == "failure" && saveChannel.metadata.errorCode !== "DUPLICATE_CHANNEL"){
+   responseObject.failure.push("Create application needed channels error. "+saveChannel.metadata.errorDetail);
+} else {
+     responseObject.success.push("Application needed channels \"requestChannel\" & \"responseChannel\" are available.");
+}
 
 var saveApplicationGroup = groups.create("application");
 if(saveApplicationGroup.metadata.status == "failure" && saveApplicationGroup.metadata.errorCode != "DUPLICATE_GROUP_NAME"){
@@ -79,22 +91,6 @@ if(saveConfiguration.metadata.status == "failure"){
     responseObject.success.push("Setup account user tokens not bound to the referrer is successful.");
 }
 
-/** Create Anonymous publish channel used to receive requests from browser **/
-var channelsList =  ["requestChannel", "responseChannel"];
-var options = {
-  "subscribeACL": "anonymous",
-  "publishACL": "anonymous"
-}
-var saveChannel = null;
-channelsList.forEach(function(channel) {
-   saveChannel = channels.create(channel, options);
-});
-
-if(saveChannel.metadata.status == "failure" && saveChannel.metadata.errorCode !== "DUPLICATE_CHANNEL"){
-       responseObject.failure.push("Create application needed channels error. "+saveChannel.metadata.errorDetail);
-    } else {
-         responseObject.success.push("Application needed channels \"requestChannel\" & \"responseChannel\" are available.");
-    }
 
 //create users to be used to login to the app
 var usersList = [ //Device used to login to iot app
@@ -121,11 +117,11 @@ usersList.forEach(function(params) {
 
 var pubsub = require("pubsub");
 var topic = pubsub.getInstance(dataChannel);
-var response = topic.subscribe(usecase+"/app/api/subscription/subscriber", "script");
+var response = topic.subscribe("app/api/subscription/subscriber", "script");
 if(response.metadata.status == "failure" && response.metadata.errorCode != "CALLBACK_SUBSCRIBED") {
-     responseObject.failure.push("Failed to subscribe the script " + usecase +"/app/api/subscription/subscriber to the channel " + dataChannel + "." + response.metadata.errorDetail);
+     responseObject.failure.push("Failed to subscribe the script app/api/subscription/subscriber to the channel " + dataChannel + "." + response.metadata.errorDetail);
 } else {
-    responseObject.success.push("The script " + usecase +"/app/api/subscription/subscriber was successfully subscribed to ingest data from the channel " + dataChannel + ".");
+    responseObject.success.push("The script app/api/subscription/subscriber was successfully subscribed to ingest data from the channel " + dataChannel + ".");
 }
 
 return responseObject;
