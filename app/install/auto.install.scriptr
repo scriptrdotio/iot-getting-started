@@ -31,7 +31,7 @@ channelsList.forEach(function(channel) {
 if(saveChannel.metadata.status == "failure" && saveChannel.metadata.errorCode !== "DUPLICATE_CHANNEL"){
     responseObject.failure.push("Create application needed channels error. "+saveChannel.metadata.errorDetail);
 } else {
-    responseObject.success.push("Application needed channels \"requestChannel\" & \"responseChannel\" are available.");
+    responseObject.success.push("Application needed channels \"requestChannel\" & \"responseChannel\"   & \"deviceDigest\"  are available.");
 }
 
 
