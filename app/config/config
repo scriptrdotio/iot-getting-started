@@ -14,7 +14,7 @@ var deviceGroup = "device";
 
 var defaultApp = "smartfarming";
 
-var businessRule = {"script": "smartfarming/app/entities/rules/decisionTable", "plugin": "SimpleDecisionTable"};
+var businessRuleScript = {"script": "app/entities/rules/decisionTable", "plugin": "SimpleDecisionTable"};
 
 var deviceDataTopUp =  {
     "lat": 40.696472, 

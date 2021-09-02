@@ -10,10 +10,10 @@ function evaluateDevice(entry) {
     try {
         var recordAsAlert = false;
         var alertType = [];
-        log.info("[app/entities/deviceEvaluator] Start Proccessing Business rule")
-        var decisions = utils.executeDecisionTable(config.businessRuleScript, entry);
+        log.info("[app/entities/deviceEvaluator] Start Proccessing Business rule"+config.businessRuleScript.script)
+        var decisions = utils.executeDecisionTable(config.businessRuleScript.script, entry);
         if(decisions && decisions.metadata && decisions.metadata.status == "failure") {
-            throw e;
+            throw decisons;
         } else {
             log.info("[app/entities/deviceevaluator] Actions processing for event "+JSON.stringify(decisions));
             for(var i = 0; decisions && i < decisions.length; i++){

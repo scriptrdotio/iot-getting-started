@@ -8,5 +8,5 @@ var authToken = authorization.substring(7, authorization.length);
 
 var user = user.get(request.user.id);
     
-var editorUrl = "https://embedded.scriptr.io?auth_token="+authToken+"&menu=0&tree=0&console=0&name="+config.businessRule.script+"&pluginName="+config.businessRule.plugin;
+var editorUrl = "https://embedded.scriptr.io?auth_token="+authToken+"&menu=0&tree=0&console=0&name="+config.businessRuleScript.script+"&pluginName="+config.businessRule.plugin;
 return editorUrl

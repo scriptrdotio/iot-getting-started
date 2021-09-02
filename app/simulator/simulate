@@ -14,7 +14,7 @@ var randy = function(bits){
 
 var data = {
     "id":"myDevice2",
-    "temperature": randomIntFromInterval(0,85),
+    "temperature": randomIntFromInterval(10,85),
     "pressure": randomIntFromInterval(26,1260),
     "acceleration":{
       "accx":randomIntFromInterval(-2500,2500),
