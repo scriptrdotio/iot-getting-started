@@ -5,11 +5,142 @@ var devices = require("device");
 var utils = require("../../entities/utils");
 var _ = require("modules/underscore/underscore.js")._;
 
+
 var deviceManager = require("../../entities/deviceManager");
 var deviceEvaluator = require("../../entities/deviceEvaluator");
 var devicePublisher = require("../../entities/devicePublisher");
 
 var config = require("../../config/config");
+
+var deviceConfig = null;
+var data = {};
+var deviceId = null;
+
+log.info("[app/api/subscription/subscriber] received the following payload \n" + JSON.stringify(request));
+
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
+var inputData = typeof(body) == "string" ? JSON.parse(body) : body;
+
+
+/** BEGIN Identify the config corresponding transformation for the request payload **/
+
+//In case there is deviceType entry available in request use this device type config setting to ingest payload
+if(config.deviceTypes && inputData[config.deviceTypeField] && config.deviceTypes[inputData[config.deviceTypeField]]) {
+
+    deviceConfig = require(config.deviceTypes[inputData[config.deviceTypeField]])
+    log.info("Device Type found in request params: "+ inputData[config.deviceTypeField] +" deviceConfig: "+ JSON.stringify(deviceConfig));
+    
+} else { // default to the config defined in the requesting device object itself in the field config
+  
+  var thisdevice  	= request.user;
+  if(thisdevice[config.deviceTypeField] && config.deviceTypes[thisdevice[config.deviceTypeField]]) { //Config needed for device is defined inside device object
+    
+    deviceConfig	= require(config.deviceTypes[thisdevice[config.deviceTypeField]]);
+    log.info("Device Type: " + thisdevice[config.deviceTypeField] + " found in requesting device attributes: " + thisdevice.id + " deviceConfig: "+ JSON.stringify(deviceConfig));
+  
+  } else {
+   
+    deviceConfig = require(config.deviceTypes["default"]);
+    log.info("Device Type Not found in request params or request device: we will use the \"default\" device type. deviceConfig: "+ JSON.stringify(deviceConfig));
+  
+  }
+	
+}
+/** END Identify the config corresponding transformation for the request payload **/
+
+
+/** BEGIN payload transformation **/
+//Check if device type config has a hexMapper
+if(deviceConfig.hexMapper){
+  var hexMapper = require(deviceConfig.hexMapper)
+  var hexTransformationOutput = hexMapper.transform(inputData[deviceConfig.hexPayloadParam] || inputData); //Get the need to be decoded param
+  inputData = _.extend(inputData, hexTransformationOutput);
+  log.info("Hex Mapper resulted the following payload \n" + JSON.stringify(inputData));   
+}
+
+//Check if device type config has a payload transformation
+if(deviceConfig.jsonMapper) {
+    var deviceMapper 					= require(deviceConfig.jsonMapper);
+    data 											= deviceMapper.mapIt(inputData);
+    Object.keys(data).forEach(function(key) { data[key] === undefined && delete data[key]});
+    log.info("JSON Mapper resulted the following payload \n" + JSON.stringify(data));   
+} else {
+  	if(!Array.isArray(inputData) && typeof inputData === 'object') { //Maybe no jsonMapper defined as hexMapper is returning the needed normalized data object
+      	data = inputData;
+        log.info("JSON Mapper NOT found, inputData is a valid object proceed with inputData \n" + JSON.stringify(inputData));   
+    } else { //Interrupt ingestion
+        log.info("JSON Mapper NOT found, inputData is a NOT a valid object exit \n" + JSON.stringify(inputData)); 
+      	return;
+    }
+}
+/** END payload transformation **/
+
+
+/** BEGIN retrieve the device to which belongs the payload in the request **/
+//Check if application sending data or device
+if(isIdInAcl(request.user.id, "group:"+config.applicationGroup)) { //If request is from a dmpBroker (third party application sending on behalf of device)
+    if(data.id) { //Device id should be in payload
+        deviceId = data.id; 
+    } else { //We are not able to identify the device from payload
+        log.info("[app/api/subscription/subscriber] Unable to identify device. Neither id in payload nor a valid device token, as the token belongs to a device in [brokers] groups.\n" + JSON.stringify(data));
+        return;
+	}
+} else { //Device is directly sending its data
+    if(data.id) {//If it is in payload, override the request device token id
+    	deviceId = data.id; 
+    } else { //Use the authenitcate request device id
+    	deviceId = data.id = request.user.id;//We have to map the id field to the actual deviceId
+    }
+}
+/** END retrieve the device to which belongs the payload in the request **/
+
+log.info("Payload sent is identified as a payload for device of id: "+deviceId);
+log.info("[app/api/subscription/subscriber] transform the payload into \n" + JSON.stringify(data));
+
+if(!_.isEmpty(data)) { 
+    try {
+        var deviceDefinition = deviceManager.getDeviceDefinition(deviceId);
+        log.info("Existing Device Definition: "+JSON.stringify(deviceDefinition));
+        //Device is not found in our device directory, or device was created without the default top ups needed by app, someone created manually
+        if(deviceDefinition == null ||  !deviceDefinition.source) { 
+            var deviceDefinition = {};
+            
+            _.extend(deviceConfig.deviceDataTopUp, utils.randomGeo({"lat": deviceConfig.deviceDataTopUp.lat, "lng": deviceConfig.deviceDataTopUp.long}, 2000));
+            
+            deviceDefinition = _.extend(deviceConfig.deviceDataTopUp, data);
+            deviceDefinition.id = deviceDefinition.name = deviceId;
+            deviceDefinition = deviceManager.buildDeviceDefinitionDocument(deviceDefinition);
+            //Save device definition
+            log.info("[app/api/subscription/subscriber] Creating/Updating Device Definition: "+JSON.stringify(Object.keys(deviceDefinition)));
+            var result = deviceManager.saveDeviceDefinition(deviceDefinition);
+            log.info("[app/api/subscription/subscriber] Save Device Definition: "+JSON.stringify(result))
+        }
+        var entry = {};
+        entry = deviceManager.buildDeviceEventDocument(deviceDefinition, data);
+        log.info("[app/api/subscription/subscriber] Processing Event Entry: " + JSON.stringify(entry))	
+        return processEntry(entry);
+
+    } catch(exception) {
+        log.info("Exception: "+JSON.stringify(exception))
+        return exception;    
+    }
+} else {
+    log.info("[app/api/subscription/subscriber] No transformation found for data");
+    return;
+}
+
+
+function processEntry(entry) {
+  
+    deviceEvaluator.evaluateDevice(entry);//appel de la decision table
+    deviceManager.saveDeviceEvent(entry);
+    devicePublisher.publishDevice(entry);
+}
+
+
+
+
+
 
 var data = {};
 var deviceId = null;

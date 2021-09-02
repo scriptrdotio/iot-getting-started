@@ -1,7 +1,16 @@
 var expiry = 60;
 
 
+//Default device types configurations
+var deviceTypes = {
+  "default": "app/config/default/config"
+}
+
+//param to be sent in payload to define deviceType or to be set as a field on the device of the token signing the payload
+var deviceTypeField = "deviceType";
+
 var applicationGroup = "application";
+
 var deviceGroup = "device";
 
 var defaultApp = "smartfarming";

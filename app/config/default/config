@@ -1,0 +1,17 @@
+var jsonMapper = "app/config/waspmote/dataTransformation";
+//var hexMapper = "app/config/meshelium/wasp/payloadAdaptor";
+//var hexPayloadParam = "hexpayload"
+
+var deviceDataTopUp =  {
+    "lat": -33.4008511, 
+    "long": -70.54576277777778,
+    "address": "Green Farms", 
+    "city": "New York",
+    "country": "United States",
+    "locationType": "Agriculture",
+    "locationSection": "Farm",
+    "physicalEnvironment": "Fields",
+    "sensor": "wasp",
+    "deviceType": "waspmote",
+    "source": "simulator"
+}
