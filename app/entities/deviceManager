@@ -62,6 +62,19 @@ function getDeviceAlertsEntries(id) {
         return null;
    }
 }
+
+function getDeviceHistoricalEntriesTimescale(id) {
+    var key = event_prefix + id;
+    var filter = {
+           "query" : "id = '"+key+"'"
+    }
+    var result = timeseries.query(filter);
+    if(result.result && result.result.length>0 )
+	    return result.result;
+    else
+	    return null;
+}
+
 /**
  * @function listHistory
  * @param {String} id: the device's id
