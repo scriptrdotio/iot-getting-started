@@ -1,3 +1,4 @@
+
 var document = require("document");
 var device = require("device");
 var utils = require("./utils");
@@ -5,7 +6,7 @@ var utils = require("./utils");
 var config = require("../config/config");
 
 var _= require("modules/underscore/underscore.js")._;
-
+var timeseries = require("timeseries").getInstance("DefaultStore");
 var log = require("log");
 log.setLevel("INFO");
 
@@ -14,8 +15,21 @@ var type = "hardware";
 var deviceGroup = config.deviceGroup
 
 
+function getLatestDeviceEntryTimescale(id) {
+    var key = event_prefix + id;
+    var filter = {
+           "query" : "id = '"+key+"'",
+           "limit": 1
+    }
+    var result = timeseries.query(filter);
+    if(result.result && result.result.length>0 )
+	    return result.result[0];
+    else
+	    return null;
+}
 function getLatestDeviceEntry(id) {
-   var key = event_prefix + id;;
+    
+   var key = event_prefix + id;
   
    var params = {
        "query" : "key like \""+key+"_%\"",
@@ -23,8 +37,8 @@ function getLatestDeviceEntry(id) {
        "sort": "creationDate<date:DESC>",
        "resultsPerPage": 1
    }
-
    var result = document.query(params);
+
    if(result.metadata.status == "success" && result.result.documents.length > 0) {
         return result.result.documents[0];
    } else {
@@ -79,7 +93,7 @@ function buildDeviceEventDocument(entry, data) {
     delete entry["apsdb.update"];
 
     entry["event_type"] = ["event"];
-    entry["key"] = event_prefix + entry.id + "_" + new Date().getTime();
+    entry["key"] = event_prefix + entry.id;
  	entry["meta.types"] = {
         "temperature": "numeric",
         "humidity": "numeric",
@@ -89,11 +103,46 @@ function buildDeviceEventDocument(entry, data) {
 }
 
 function saveDeviceEvent(entry) {
+	
    log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
-    log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(document.save(entry)))
+	var records = [];
+    var d = new Date();
+    d.setSeconds(d.getSeconds() + 2);
+    var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);
+    var fields = {
+        "id": entry.key,
+        "timestamp": ts,
+        "long": convertFloat(entry.long),
+        "lat": convertFloat(entry.lat),
+        "pressure": convertFloat(entry.pressure),
+        "humidity": convertFloat(entry.humidity),
+        "temperature": convertFloat(entry.temperature),     
+        "battery": convertFloat(entry.soil_temp), 
+        "pluviometer_1": convertFloat(entry.pluviometer_1), 
+        "pluviometer_2": convertFloat(entry.pluviometer_2), 
+        "pluviometer_3": convertFloat(entry.pluviometer_3), 
+        "soil_moisture": convertFloat(entry.soil_moisture), 
+        "anemometer": convertFloat(entry.anemometer), 
+        "wind_direction": convertFloat(entry.wind_direction), 
+        "soil_temperature": convertFloat(entry.soil_temperature), 
+        "grideye": "grid-1"
+    }
+    records.push(fields);
+    var test = timeseries.log(records);
+    //log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(document.save(entry)))
   // return ;
 }
 
+function convertFloat(f){
+	if(f)
+	    return parseFloat(f);
+    else
+    	return null;
+}
+
+function getRandomInRange(from, to, fixed) {
+    return (Math.random() * (to - from) + from).toFixed(fixed) * 1
+}
 
 function buildDeviceDefinitionDocument(entry) {
     entry["id"] = entry.id;

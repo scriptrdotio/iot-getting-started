@@ -5,11 +5,26 @@ var documents = [];
 var devices = deviceManager.getAllDevicesDefinition();
 if(devices) {
     for(var j = 0; j < devices.length; j++) {
-        console.log(devices[j].id)
-        var entry = deviceManager.getLatestDeviceEntry(devices[j].id)
-        if(entry)
-            documents.push(entry)
+        console.log(devices[j].id);
+        var entry = deviceManager.getLatestDeviceEntryTimescale(devices[j].id);
+        if(entry){
+        	//Merge device details in the entry details in a way that suits the frontend
+            //TODO: remove entries not expected by the frontend
+        	entry.country = devices[j]["country"];
+        	entry.city = devices[j]["city"];
+        	entry.locationType = devices[j]["locationType"];
+        	entry.source = devices[j]["source"];
+            entry.address = devices[j]["address"];
+        	entry.physicalEnvironment = devices[j]["physicalEnvironment"];
+        	entry.sensor = devices[j]["sensor"];
+        	entry.locationSection = devices[j]["locationSection"];
+           	entry.key = entry.id;
+            entry.id = devices[j]["id"];
+            entry.creationDate = new Date(entry.timestamp.time);
+            delete entry.timestamp;
+			documents.push(entry);
         }
+    }
 }
-return utils.format(documents);
-
+var formatted = utils.format(documents);
+return formatted;
