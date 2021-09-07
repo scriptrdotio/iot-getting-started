@@ -1,0 +1,14 @@
+{
+	"underscore": {
+    	"repositoryOwner":"scriptrdotio", 
+        "repositoryName" : "scriptrConnectors",
+        "fileNamePattern": ".*",
+        "repositoryPath":"/scripts/modules/underscore",
+        "repositoryBranch":"master",
+        "purge": "false",
+        "apsws.responseType" : "JSON",
+        "export":"true",
+        "targetFolder": "modules/underscore",
+        "isPrivate": true
+    }
+}
