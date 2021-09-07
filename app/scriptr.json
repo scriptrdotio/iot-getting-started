@@ -10,5 +10,17 @@
         "export":"true",
         "targetFolder": "modules/underscore",
         "isPrivate": "true"
-	}
+    },
+    "momentjs": {
+    	"repositoryOwner":"scriptrdotio", 
+        "repositoryName" : "moment",
+        "fileNamePattern": ".*",
+        "repositoryPath":"/scriptr",
+        "repositoryBranch":"master",
+        "purge": "false",
+        "apsws.responseType" : "JSON",
+        "export":"true",
+        "targetFolder": "modules/momentjs",
+        "isPrivate": "true"
+    }
 }
