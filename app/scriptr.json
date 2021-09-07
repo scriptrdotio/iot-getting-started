@@ -9,6 +9,6 @@
         "apsws.responseType" : "JSON",
         "export":"true",
         "targetFolder": "modules/underscore",
-        "isPrivate": true
-    }
+        "isPrivate": "true"
+	}
 }
