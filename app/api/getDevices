@@ -1,4 +1,4 @@
-var deviceManager = require("../entities/deviceManager")
+var deviceManager = require("../entities/deviceManager");
 
 var documents = [];
 var devices = deviceManager.getAllDevicesDefinition();

@@ -18,7 +18,6 @@ var deviceGroup = config.deviceGroup
 
 
 function getLatestDeviceEntryTimescale(id) {
-	var defaultStore = require("timeseries").getInstance("DefaultStore");
     var key = event_prefix + id;
     var filter = {
            "query" : "id = '"+key+"'",
@@ -31,7 +30,6 @@ function getLatestDeviceEntryTimescale(id) {
 	    return null;
 }
 function getLatestDeviceEntry(id) {
-    
    var key = event_prefix + id;
   
    var params = {
@@ -50,12 +48,11 @@ function getLatestDeviceEntry(id) {
 }
 
 function getDeviceAlertsEntriesTimescale(id) {
-	var alertStore = require("timeseries").getInstance("AlertStore");
    var key = alert_prefix + id;
     var filter = {
-           "query" : "id = '"+key+"'",
-           "limit": 1
+           "query" : "id = '"+key+"'"
     };
+    log.info(">>>>>>>>>key " + key);
     var result = alertStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result;
@@ -82,7 +79,6 @@ function getDeviceAlertsEntries(id) {
 }
 
 function getDeviceHistoricalEntriesTimescale(id) {
-	var defaultStore = require("timeseries").getInstance("DefaultStore");
     var key = event_prefix + id;
     var filter = {
            "query" : "id = '"+key+"'"
@@ -135,7 +131,6 @@ function buildDeviceEventDocument(entry, data) {
 }*/
 
 function saveDeviceEvent(entry) {
-	var defaultStore = require("timeseries").getInstance("DefaultStore");
     log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
 	var records = [];
     var d = new Date();
@@ -164,7 +159,6 @@ function saveDeviceEvent(entry) {
 }
 
 function saveDeviceAlerts(deviceId, alertsType) {
-	var alertStore = require("timeseries").getInstance("AlertStore");
     var d = new Date();
     d.setSeconds(d.getSeconds() + 2);
     var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);

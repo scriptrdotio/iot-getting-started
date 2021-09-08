@@ -1,5 +1,4 @@
-var deviceManager = require("../entities/deviceManager")
-
+var deviceManager = require("../entities/deviceManager");
 var query = {};
 if(request.body != null){
 	query = request.body;
@@ -16,8 +15,8 @@ if(typeof query == 'string'){
       	return "INVALID OR MISSING PARAMETER";
     }
 }
-var device = deviceManager.getDeviceDefinition(query.id);
-var entries = deviceManager.getDeviceHistoricalEntriesTimescale(query.id);
+var device = deviceManager.getDeviceDefinition("myDevice");
+var entries = deviceManager.getDeviceHistoricalEntriesTimescale("myDevice5");
 for(var j=0; j<entries.length; j++){
 	entries[j].country = device["country"];
     entries[j].city = device["city"];
