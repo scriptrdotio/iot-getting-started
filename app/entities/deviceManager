@@ -6,8 +6,8 @@ var utils = require("./utils");
 var config = require("../config/config");
 
 var _= require("modules/underscore/underscore.js")._;
-var defaultStore = require("timeseries").getInstance("DefaultStore");
-var alertStore = require("timeseries").getInstance("AlertStore");
+var eventStore = require("ts").getInstance("EventStore");
+var alertStore = require("ts").getInstance("AlertStore");
 var log = require("log");
 log.setLevel("INFO");
 
@@ -23,7 +23,7 @@ function getLatestDeviceEntryTimescale(id) {
            "query" : "id = '"+key+"'",
            "limit": 1
     };
-    var result = defaultStore.query(filter);
+    var result = eventStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result[0];
     else
@@ -83,7 +83,7 @@ function getDeviceHistoricalEntriesTimescale(id) {
     var filter = {
            "query" : "id = '"+key+"'"
     };
-    var result = defaultStore.query(filter);
+    var result = eventStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result;
     else
@@ -155,7 +155,7 @@ function saveDeviceEvent(entry) {
         "grideye": "grid-1"
     }
     records.push(fields);
-    var test = defaultStore.log(records);
+    eventStore.log(records);
 }
 
 function saveDeviceAlerts(deviceId, alertsType) {

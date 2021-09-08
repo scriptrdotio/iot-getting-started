@@ -3,9 +3,12 @@ var channels = require("channel");
 var devices = require("device");
 var users = require("user");
 var groups = require("group");
+var timeseriesStore = require("ts-store");
 
 var config = require("../config/config");
 
+clearTimeseriesStores(responseObject);
+createTimeseriesStores(responseObject);
 
 /** Create a group editor that allows its users to access the scriptr ide plugins, ex: decision table **/
 var saveEditorGroup = groups.create("editor");
@@ -144,3 +147,390 @@ devicesList.forEach(function(params) {
 
 
 return responseObject;
+
+function createTimeseriesStores(responseObject){
+    var alertStoreFields = [
+        {
+            "name": "timestamp",
+            "datatype": "TIMESTAMP WITHOUT TIME ZONE",
+            "nullable": false
+        },
+        {
+            "name": "id",
+            "datatype": "TEXT",
+            "nullable": false
+        },
+        {
+            "name": "alert_type",
+            "datatype": "TEXT",
+            "nullable": false        
+        },
+        {
+            "name": "alert_message",
+            "datatype": "TEXT",
+            "nullable": false        
+        }
+    ];
+    var timeFieldName = "timestamp";
+    var created = timeseriesStore.create("AlertStore", alertStoreFields, timeFieldName);
+    if(created.metadata.status=="success"){
+    	responseObject.success.push("Created alerts store in timescale db");
+    }else{
+        responseObject.failure.push("Failed to create alerts store in timescale db");
+    }
+    var defaultStoreFields = [
+        {
+            "name": "timestamp",
+            "datatype": "TIMESTAMP WITHOUT TIME ZONE",
+            "nullable": false
+        },
+        {
+            "name": "timezone_shift",
+            "datatype": "int",
+            "nullable": true
+        },
+        {
+            "name": "id",
+            "datatype": "TEXT",
+            "nullable": false        
+        },
+        {
+            "name": "long",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "lat",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "battery",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "temperature",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "temperature_probe",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "humidity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "pressure",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "soil_moisture",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "soil_temperature",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "soil_conductivity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "liquid_height",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "pluviometer_1",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "pluviometer_2",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "pluviometer_3",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "anemometer",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "wind_direction",
+            "datatype": "TEXT",
+            "nullable": true        
+        },
+        {
+            "name": "wind_deg",
+            "datatype": "int",
+            "nullable": true        
+        },
+        {
+            "name": "wind_speed",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "snow_1h_mm",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "snow_2",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "snow_3h_mm",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "clouds_percent",
+            "datatype": "int",
+            "nullable": true        
+        },
+        {
+            "name": "weather_type_id",
+            "datatype": "int",
+            "nullable": true        
+        },
+        {
+            "name": "particulate_matter_1",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "particulate_matter_2_5",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "particulate_matter_10",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "carbon_monoxide",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "carbon_dioxide",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "nitrogen_dioxide",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "sulfur_dioxide",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "oxygen",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "ozone",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "methane",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "ammonia",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "ph",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "dissolved_oxygen",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "water_conductivity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "oxidation_reduction_potential",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "proximity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "luminosity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "salinity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "turbidity",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "acc_x",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "acc_y",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "acc_z",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "gyr_x",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "gyr_y",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "gyr_z",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "mag_x",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "mag_y",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "mag_z",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "speed",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "direction",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "distance",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "rssi",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "snr",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "rsrp",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "impact",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "altitude",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "gps_accuracy",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "noise",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "tvoc",
+            "datatype": "DOUBLE PRECISION",
+            "nullable": true        
+        },
+        {
+            "name": "grideye",
+            "datatype": "TEXT",
+            "nullable": true        
+        }
+    ];
+    timeFieldName = "timestamp";
+    var created = timeseriesStore.create("EventStore", defaultStoreFields, timeFieldName);
+    if(created.metadata.status=="success"){
+    	responseObject.success.push("Created events store in timescale db");
+    }else{
+        responseObject.failure.push("Failed to create events store in timescale db");
+    }
+}
+
+function clearTimeseriesStores(){
+	
+	var cleared = timeseriesStore.delete("EventStore");
+    if(cleared.metadata.status=="success"){
+    	responseObject.success.push("Cleared events store in timescale db");
+    }else{
+    	responseObject.success.push("Events store does not exist to be cleared in timescale db");
+    }
+    var cleared = timeseriesStore.delete("AlertStore");
+    if(cleared.metadata.status=="success"){
+    	responseObject.success.push("Cleared alerts events store in timescale db");
+    }else{
+    	responseObject.success.push("Alerts store does not exist to be cleared in timescale db");
+    }
+}
