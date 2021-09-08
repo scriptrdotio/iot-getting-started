@@ -4,7 +4,7 @@ log.setLevel("info");
 var devices = require("device");
 var utils = require("../../entities/utils");
 var _ = require("modules/underscore/underscore.js")._;
-
+var defaultStore = require("timeseries").getInstance("DefaultStore");
 
 var deviceManager = require("../../entities/deviceManager");
 var deviceEvaluator = require("../../entities/deviceEvaluator");
@@ -134,7 +134,7 @@ if(!_.isEmpty(data)) {
 
 function processEntry(entry) {
     deviceEvaluator.evaluateDevice(entry);//appel de la decision table
-    deviceManager.saveDeviceEvent(entry);
+    deviceManager.saveDeviceEvent(entry, defaultStore);
     devicePublisher.publishDevice(entry);
 }
 
