@@ -18,5 +18,5 @@ if(typeof query == 'string'){
     }
 }
 
-var devices = deviceManager.getDeviceAlertsEntries(query.id);
+var devices = deviceManager.getDeviceAlertsEntriesTimeScale(query.id);
 return devices;

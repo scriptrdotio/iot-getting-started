@@ -16,8 +16,8 @@ if(typeof query == 'string'){
       	return "INVALID OR MISSING PARAMETER";
     }
 }
-var device = deviceManager.getDeviceDefinition("myDevice5");
-var entries = deviceManager.getDeviceHistoricalEntriesTimescale("myDevice5");
+var device = deviceManager.getDeviceDefinition(query.id);
+var entries = deviceManager.getDeviceHistoricalEntriesTimescale(query.id);
 for(var j=0; j<entries.length; j++){
 	entries[j].country = device["country"];
     entries[j].city = device["city"];

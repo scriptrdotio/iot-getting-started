@@ -45,6 +45,18 @@ function getLatestDeviceEntry(id) {
         return null;
    }
 }
+function getDeviceAlertsEntriesTimeScale(id) {
+   var key = event_prefix + id;;
+   var params = {
+       "query" : "id like \""+key+"_%\" and event_type in [\"alert\"]",        
+   }
+   
+    var result = timeseries.query(filter);
+    if(result.result && result.result.length>0 )
+	    return result.result;
+    else
+	    return null;
+}
 
 function getDeviceAlertsEntries(id) {
    var key = event_prefix + id;;
