@@ -6,22 +6,25 @@ var utils = require("./utils");
 var config = require("../config/config");
 
 var _= require("modules/underscore/underscore.js")._;
-var timeseries = require("timeseries").getInstance("DefaultStore");
+var defaultStore = require("timeseries").getInstance("DefaultStore");
+var alertStore = require("timeseries").getInstance("AlertStore");
 var log = require("log");
 log.setLevel("INFO");
 
 var event_prefix = "device_event_";
+var alert_prefix = "device_alert_";
 var type = "hardware";
 var deviceGroup = config.deviceGroup
 
 
 function getLatestDeviceEntryTimescale(id) {
+	var defaultStore = require("timeseries").getInstance("DefaultStore");
     var key = event_prefix + id;
     var filter = {
            "query" : "id = '"+key+"'",
            "limit": 1
-    }
-    var result = timeseries.query(filter);
+    };
+    var result = defaultStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result[0];
     else
@@ -45,17 +48,20 @@ function getLatestDeviceEntry(id) {
         return null;
    }
 }
-function getDeviceAlertsEntriesTimeScale(id) {
-   var key = event_prefix + id;;
-   var params = {
-       "query" : "id like \""+key+"_%\" and event_type in [\"alert\"]",        
-   }
-   
-    var result = timeseries.query(filter);
+
+function getDeviceAlertsEntriesTimescale(id) {
+	var alertStore = require("timeseries").getInstance("AlertStore");
+   var key = alert_prefix + id;
+    var filter = {
+           "query" : "id = '"+key+"'",
+           "limit": 1
+    };
+    var result = alertStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result;
     else
 	    return null;
+        
 }
 
 function getDeviceAlertsEntries(id) {
@@ -76,11 +82,12 @@ function getDeviceAlertsEntries(id) {
 }
 
 function getDeviceHistoricalEntriesTimescale(id) {
+	var defaultStore = require("timeseries").getInstance("DefaultStore");
     var key = event_prefix + id;
     var filter = {
            "query" : "id = '"+key+"'"
-    }
-    var result = timeseries.query(filter);
+    };
+    var result = defaultStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result;
     else
@@ -107,7 +114,7 @@ function getDeviceHistoricalEntries(id) {
         return null;
    }
 }
-
+/*
 function buildDeviceEventDocument(entry, data) {
     _.extendOwn(entry, data);
     delete entry.auth_token;
@@ -125,17 +132,17 @@ function buildDeviceEventDocument(entry, data) {
         "pressure": "numeric"
    	}
     return entry;
-}
+}*/
 
 function saveDeviceEvent(entry) {
-	
-   log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
+	var defaultStore = require("timeseries").getInstance("DefaultStore");
+    log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
 	var records = [];
     var d = new Date();
     d.setSeconds(d.getSeconds() + 2);
     var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);
     var fields = {
-        "id": entry.key,
+        "id": (event_prefix + entry.id),
         "timestamp": ts,
         "long": convertFloat(entry.long),
         "lat": convertFloat(entry.lat),
@@ -153,9 +160,26 @@ function saveDeviceEvent(entry) {
         "grideye": "grid-1"
     }
     records.push(fields);
-    var test = timeseries.log(records);
-    //log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(document.save(entry)))
-  // return ;
+    var test = defaultStore.log(records);
+}
+
+function saveDeviceAlerts(deviceId, alertsType) {
+	var alertStore = require("timeseries").getInstance("AlertStore");
+    var d = new Date();
+    d.setSeconds(d.getSeconds() + 2);
+    var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);
+    var records = [];            
+    for(var i=0; i<alertsType.length; i++){
+        var fields = {
+            "id": (alert_prefix + deviceId),
+            "timestamp": ts,
+            "alert_type": alertsType[i],
+            "alert_message": "this is a message"
+        };
+        records.push(fields);
+    }
+    
+    alertStore.log(records);
 }
 
 function convertFloat(f){

@@ -116,8 +116,10 @@ if(!_.isEmpty(data)) {
             log.info("[app/api/subscription/subscriber] Save Device Definition: "+JSON.stringify(result))
         }
         var entry = {};
-        entry = deviceManager.buildDeviceEventDocument(deviceDefinition, data);
-        log.info("[app/api/subscription/subscriber] Processing Event Entry: " + JSON.stringify(entry))	
+        //log.info("[app/api/subscription/subscriber] Processing Event data: " + JSON.stringify(data))	
+        //entry = deviceManager.buildDeviceEventDocument(deviceDefinition, data);
+        entry = _.extendOwn(deviceDefinition, data);
+        //log.info("[app/api/subscription/subscriber] Processing Event Entry: " + JSON.stringify(entry))	
         return processEntry(entry);
 
     } catch(exception) {
@@ -131,7 +133,6 @@ if(!_.isEmpty(data)) {
 
 
 function processEntry(entry) {
-  
     deviceEvaluator.evaluateDevice(entry);//appel de la decision table
     deviceManager.saveDeviceEvent(entry);
     devicePublisher.publishDevice(entry);
