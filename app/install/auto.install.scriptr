@@ -7,7 +7,7 @@ var timeseriesStore = require("ts-store");
 
 var config = require("../config/config");
 
-clearTimeseriesStores(responseObject);
+//clearTimeseriesStores(responseObject);
 createTimeseriesStores(responseObject);
 
 /** Create a group editor that allows its users to access the scriptr ide plugins, ex: decision table **/
