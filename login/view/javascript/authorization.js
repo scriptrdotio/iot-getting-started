@@ -17,6 +17,13 @@ $.widget( "scriptr.authorization", {
         if(this.options.validateTokenApi){
             this.validateTokenApi = this.options.validateTokenApi;
         }
+        
+        if(this.options.validateTokenInterval){
+            this.validateTokenInterval = this.options.validateTokenInterval * 1000;
+        } else {
+             this.validateTokenInterval = 30000;
+        }
+        
         this.validateToken();    
     },
     
@@ -47,7 +54,7 @@ $.widget( "scriptr.authorization", {
                 if(data.response.metadata.status == "success"){
                     this.user = data.response.result;
                     this.onTokenValid();
-                    setTimeout(jQuery.proxy(this.validateToken,this), 20000);
+                    setTimeout(jQuery.proxy(this.validateToken,this), this.validateTokenInterval);
                 }
             },this),
             error:jQuery.proxy(function(data){
@@ -65,6 +72,8 @@ $.widget( "scriptr.authorization", {
     onTokenInvalid :function(){
         $.removeCookie('user',{'path':'/'});
         $.removeCookie('token',{'path':'/'});
+        $.removeCookie('tokenExpiry',{'path':'/'});
+        $.removeCookie('lang',{'path':'/'});
         location.href= this.loginPage;
     },
     
@@ -75,6 +84,9 @@ $.widget( "scriptr.authorization", {
     logout:function(){
         $.removeCookie('user',{'path':'/'});
         $.removeCookie('token',{'path':'/'});
+        $.removeCookie('tokenExpiry',{'path':'/'});
+        $.removeCookie('lang',{'path':'/'});
+        window.localStorage.clear();
         location.href= this.loginPage;
     }
 });

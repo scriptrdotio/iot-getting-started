@@ -49,9 +49,10 @@ var config = {
 }
 
 var login = {
-   expiry:6,
    loginApi: "/login/api/login",
    validateTokenApi: "/login/api/validateToken",
+   validateTokenInterval:30 //in seconds if not set it will default to 30. Sets the interval over which we will call validateTokenApi to check if the token is still valid. This is needed for static pages who don't pass by providers httpClient & wsClient.
+
 };
 
 var forgotPassword = {
@@ -78,3 +79,39 @@ myApp.constant("constants", {
   }
 })
 ```
+
+## sample usage in applications
+
+```
+<!-- login includes -->
+    <script src="/login/view/javascript/authorization.js"></script>
+    <script src="/login/view/javascript/config.js"></script>
+```
+
+```
+<script type="text/javascript"> 
+          
+          var authorization  = $.scriptr.authorization(
+              {
+                  onTokenValid: function(){ }, 
+                  loginPage: config.loginPage,
+                  validateTokenApi: login.validateTokenApi,
+                  validateTokenInterval: login.validateTokenInterval
+              }
+          );
+
+          angular.module('myApp').controller('myAppCtrl', function($rootScope, $scope, constants, $sce, wsClient, httpClient) {
+            
+            wsClient.onInvalidAuthentication.then(function(e) {
+                authorization.onTokenInvalid() 
+            });
+              
+            httpClient.onInvalidAuthentication.then(function(e) {
+                authorization.onTokenInvalid() 
+            });
+         });
+          
+     	
+    </script>
+```
+
