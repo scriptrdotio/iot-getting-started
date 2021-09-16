@@ -3,7 +3,7 @@ myApp.constant("constants", {
    sources : {
     "simulator": { 
    	  "mapMarker": {
-          url: "//s3.amazonaws.com/scriptr-cdn/smart-farming/grain-marker.png"
+          url: "//scriptr-cdn.s3.amazonaws.com/marketplace/iotgettingstarted/images/marker.png"
    	  }
     }
   },
@@ -12,7 +12,7 @@ myApp.constant("constants", {
   },
   infoWindows: {
     "icons": {
-         "id": '<img  src="//s3.amazonaws.com/scriptr-cdn/smart-farming/granary.png">',
+         "id": '<img  src="//scriptr-cdn.s3.amazonaws.com/marketplace/iotgettingstarted/images/device.png">',
          "device": ' <img   alt="Embedded Image" src="//s3.amazonaws.com/scriptr-cdn/common/images/device.png">',
          "address": '<img alt="Embedded Image"  src="//s3.amazonaws.com/scriptr-cdn/common/images/location.png" />',
          "locationType": '<img alt="Embedded Image"    src="//s3.amazonaws.com/scriptr-cdn/common/images/industrial.png" />',
