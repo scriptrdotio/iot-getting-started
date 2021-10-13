@@ -154,6 +154,8 @@ myApp.controller('alertsCtrl', function(httpClient, $routeParams, constants) {
        vm.icons = constants.infoWindows.icons;
        vm.deviceKey = null;
        vm.apis = constants.apis;
+       vm.colDef = constants.alertsGrid;
+    
        vm.init = function(){
             if($routeParams && $routeParams.deviceId) {
                 vm.deviceKey = $routeParams.deviceId;
@@ -176,12 +178,15 @@ myApp.controller('alertsCtrl', function(httpClient, $routeParams, constants) {
         }
         
         vm.summaryData = function(data) {
-            if(data && data[vm.deviceKey] && data[vm.deviceKey][0] && data[vm.deviceKey][0][0])
+            /*if(data && data[vm.deviceKey] && data[vm.deviceKey][0] && data[vm.deviceKey][0][0])
                 vm.selectedDevice = data[vm.deviceKey][0][0];
                 var selectedDeviceSensors = _.keys(vm.selectedDevice);
             	vm.colDef = _.filter(constants.alertsGrid, function(columns) { 
                     return selectedDeviceSensors.indexOf(columns.field) > -1;
-                });
+                });*/
+            data.id = data.id.replace("device_event_","");
+            vm.selectedDevice =  data;
+            
             
         }
 });
@@ -222,6 +227,8 @@ myApp.controller('dashboardCtrl', function($scope,  wsClient, httpClient, $route
             httpClient.get(vm.apis.getLatestDevice, vm.params).then(
                 function(data, response) {
                     vm.consumeData(data)
+                    vm.summaryData(data)
+
                 },
                 function(err) {
                     console.log('ERROR', error);
@@ -278,6 +285,11 @@ myApp.controller('dashboardCtrl', function($scope,  wsClient, httpClient, $route
     
     vm.accelerometerFormatData= function(data){
         return {"x": data.latest.acc_x, "y": data.latest.acc_y, "z": data.latest.acc_z};
+    }
+    
+    vm.summaryData = function(data) {
+    	data.id = data.id.replace("device_event_","");
+    	vm.selectedDevice =  data;
     }
 });
 

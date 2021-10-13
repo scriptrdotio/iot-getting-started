@@ -20,6 +20,9 @@ if(devices) {
         	entry.locationSection = devices[j]["locationSection"];
            	entry.key = entry.id;
             entry.id = devices[j]["id"];
+            entry.lat = devices[j]["lat"];
+            entry.long = devices[j]["long"];      
+            entry.name = devices[j]["name"];  
             entry.creationDate = new Date(entry.timestamp.time);
             delete entry.timestamp;
 			documents.push(entry);
@@ -27,4 +30,5 @@ if(devices) {
     }
 }
 var formatted = utils.format(documents);
+log.info(JSON.stringify(formatted));
 return formatted;

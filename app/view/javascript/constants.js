@@ -21,7 +21,7 @@ myApp.constant("constants", {
          "humidity": '<img alt="Embedded Image"  src="//s3.amazonaws.com/scriptr-cdn/common/images/humidity.png" />'
      }
   },
-  alertsGrid: [
+  /*alertsGrid: [
       {headerName: "Temperature", field: "temperature", cellRenderer: function(params){return params.value + " " + ((params.data.temperature_unit) ? params.data.temperature_unit : "°C")} },
       
       {headerName: "Humidity", field: "humidity", cellRenderer: function(params){return params.value + " " +((params.data.humidity_unit) ? params.data.humidity_unit : "%")}},
@@ -29,6 +29,29 @@ myApp.constant("constants", {
       {headerName: "Timestamp", field: "creationDate", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}},
       
       {headerName: "Alerts", field: "alert_type", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}},
+      
+      {field: "temperature_unit", hide: true},
+      {field: "humidity_unit", hide: true},
+      {field: "pressure_unit", hide: true}
+  ],*/
+    alertsGrid: [
+      {headerName: "Timestamp", field: "timestamp", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'},  cellRenderer: function(params){
+          return moment(params.data.timestamp.time).format("LLL");
+      }},
+      
+      {headerName: "Device", field: "id", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}, cellRenderer: function(params){
+          return params.value.replace("device_alert_","");
+      }},
+      {headerName: "Alert", field: "alert_type", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}},
+      {headerName: "Details", field: "alert_message", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}},
+      
+     {headerName: "Temperature", field: "temperature", cellRenderer: function(params){return params.value + " " + ((params.data.temperature_unit) ? params.data.temperature_unit : "°C")}, hide: true},
+      
+      {headerName: "Humidity", field: "humidity", cellRenderer: function(params){return params.value + " " +((params.data.humidity_unit) ? params.data.humidity_unit : "%")}, hide: true},
+      
+      
+      
+      {headerName: "Alerts", field: "alert_type", cellStyle: {'white-space': 'normal', 'word-break': 'break-all'}, hide: true},
       
       {field: "temperature_unit", hide: true},
       {field: "humidity_unit", hide: true},

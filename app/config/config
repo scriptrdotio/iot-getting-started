@@ -14,6 +14,7 @@ var deviceGroup = "device";
 
 var defaultApp = "smartfarming";
 
+var businessRule = {"script": "app/entities/rules/decisionTable", "plugin": "SimpleDecisionTable"};
 var businessRuleScript = {"script": "app/entities/rules/decisionTable", "plugin": "SimpleDecisionTable"};
 
 var deviceDataTopUp =  {
@@ -56,6 +57,20 @@ var templates = {
       PROXIMITY_ALERT: {
           subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Proximity Alert!',
           body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> sensor <%= id %> has flagged a proximity alert with value <%= proximity %>.'
+      }
+  },
+  record: {
+      HIGH_TEMPERATURE: {
+        body: 'Registered a high temperature of <%= temperature %>.'
+      },
+      LOW_TEMPERATURE: {
+        body: 'Registered a low temperature of <%= temperature %>.'
+      },
+      HIGH_HUMIDITY: {
+        body: 'Registered a high humidity of <%= humidity %>.'
+      },
+      LOW_HUMIDITY: {
+        body: 'Registered a low humidity of <%= humidity %>.'
       }
   }
 }

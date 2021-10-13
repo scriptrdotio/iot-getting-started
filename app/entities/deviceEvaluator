@@ -4,15 +4,17 @@ var deviceManager = require("./deviceManager");
 var utils = require("./utils");
 var config = require("../config/config");
 
+var templates = require("app/entities/actions/templates");
+
 var log = require("log");
 log.setLevel("INFO");
 
 function evaluateDevice(entry) {
     try {
         var recordAsAlert = false;
-        var alertsType = [];
-        log.info("[app/entities/deviceEvaluator] Start Proccessing Business rule"+config.businessRuleScript.script)
-        var decisions = utils.executeDecisionTable(config.businessRuleScript.script, entry);
+        var alerts = [];
+        log.info("[app/entities/deviceEvaluator] Start Proccessing Business rule"+config.businessRule.script + " "+ JSON.stringify(entry))
+        var decisions = utils.executeDecisionTable(config.businessRule.script, entry);
         if(decisions && decisions.metadata && decisions.metadata.status == "failure") {
             throw decisons;
         } else {
@@ -21,7 +23,7 @@ function evaluateDevice(entry) {
                 emailAlert.execute(null, entry, decisions[i].sendEmail);
                 if(decisions[i].isAlert == "true"){
                     recordAsAlert = true; 
-                    alertsType.push(decisions[i].sendEmail);
+                    alerts.push({"type": decisions[i].sendEmail, "message":  _.template(templates.getTemplate("record", decisions[i].sendEmail).body)(entry)});
                 }
             }
         }
@@ -31,10 +33,8 @@ function evaluateDevice(entry) {
         log.info("[app/entities/deviceevaluator] End Proccessing Business rule");
         log.info("[app/entities/deviceevaluator] Flag device event as alert: "+ recordAsAlert)
         if(recordAsAlert) {
-        	deviceManager.saveDeviceAlerts(entry.id, alertsType);
-	        
+        	deviceManager.saveDeviceAlerts(entry.id, alerts);
         }
     }
 }
-
 

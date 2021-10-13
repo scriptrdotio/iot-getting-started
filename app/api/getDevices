@@ -21,11 +21,14 @@ if(devices) {
         	entry.locationSection = devices[j]["locationSection"];
            	entry.key = entry.id;
             entry.id = devices[j]["id"];
+            entry.name = devices[j]["name"];
             entry.creationDate = new Date(entry.timestamp.time);
+            entry.lat = devices[j]["lat"];
+            entry.long = devices[j]["long"];
             delete entry.timestamp;
+            
             documents.push(entry);
         }
     }
 }
 return documents;
-

@@ -6,6 +6,8 @@ var utils = require("./utils");
 var config = require("../config/config");
 
 var _= require("modules/underscore/underscore.js")._;
+var moment = require("modules/momentjs/moment.min.js").moment;
+
 var eventStore = require("ts").getInstance("EventStore");
 var alertStore = require("ts").getInstance("AlertStore");
 var log = require("log");
@@ -21,7 +23,8 @@ function getLatestDeviceEntryTimescale(id) {
     var key = event_prefix + id;
     var filter = {
            "query" : "id = '"+key+"'",
-           "limit": 1
+           "limit": 1,
+           "sort":"timestamp DESC"
     };
     var result = eventStore.query(filter);
     if(result.result && result.result.length>0 )
@@ -50,9 +53,9 @@ function getLatestDeviceEntry(id) {
 function getDeviceAlertsEntriesTimescale(id) {
    var key = alert_prefix + id;
     var filter = {
-           "query" : "id = '"+key+"'"
+           "query" : "id = '"+key+"'",
+           "sort":"timestamp DESC"
     };
-    log.info(">>>>>>>>>key " + key);
     var result = alertStore.query(filter);
     if(result.result && result.result.length>0 )
 	    return result.result;
@@ -100,7 +103,8 @@ function getDeviceHistoricalEntries(id) {
    
    var params = {
        "query" : "key like \""+key+"_%\"",
-       "fields": "*"
+       "fields": "*",
+       "sort":"timestamp ASC"
    }
    
    var result = document.query(params);
@@ -130,45 +134,46 @@ function buildDeviceEventDocument(entry, data) {
     return entry;
 }*/
 
+function updateDeviceTimestamp(entry, latestTimestamp) {
+    return device.save({
+       id: entry.id,
+       timestamp: latestTimestamp
+    });
+	    
+}
+
 function saveDeviceEvent(entry) {
     log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
-	var records = [];
-    var d = new Date();
+  	var records = [];
+    var d = new Date();//(entry.timestamp);
     d.setSeconds(d.getSeconds() + 2);
     var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);
     var fields = {
         "id": (event_prefix + entry.id),
-        "timestamp": ts,
-        "long": convertFloat(entry.long),
-        "lat": convertFloat(entry.lat),
-        "pressure": convertFloat(entry.pressure),
-        "humidity": convertFloat(entry.humidity),
-        "temperature": convertFloat(entry.temperature),     
-        "battery": convertFloat(entry.soil_temp), 
-        "pluviometer_1": convertFloat(entry.pluviometer_1), 
-        "pluviometer_2": convertFloat(entry.pluviometer_2), 
-        "pluviometer_3": convertFloat(entry.pluviometer_3), 
-        "soil_moisture": convertFloat(entry.soil_moisture), 
-        "anemometer": convertFloat(entry.anemometer), 
-        "wind_direction": convertFloat(entry.wind_direction), 
-        "soil_temperature": convertFloat(entry.soil_temperature), 
-        "grideye": "grid-1"
+        "timestamp": ts
+    };
+    var keys = Object.keys(entry)
+    for (var key of keys) {
+        if(key!="timestamp" && key!="id"){
+           fields[key] = entry[key];
+        }
     }
+    fields["categories"] = [""];
     records.push(fields);
-    eventStore.log(records);
+    log.info("[app/entities/devicemanager] saving device result."+JSON.stringify(eventStore.log(records)));
 }
 
-function saveDeviceAlerts(deviceId, alertsType) {
+function saveDeviceAlerts(deviceId, alerts) {
     var d = new Date();
     d.setSeconds(d.getSeconds() + 2);
     var ts = d.toISOString().replace("T", " ").replace("Z", "").substring(0,19);
     var records = [];            
-    for(var i=0; i<alertsType.length; i++){
+    for(var i=0; i<alerts.length; i++){
         var fields = {
             "id": (alert_prefix + deviceId),
             "timestamp": ts,
-            "alert_type": alertsType[i],
-            "alert_message": "this is a message"
+            "alert_type": alerts[i].type,
+            "alert_message": alerts[i].message
         };
         records.push(fields);
     }
@@ -177,11 +182,14 @@ function saveDeviceAlerts(deviceId, alertsType) {
 }
 
 function convertFloat(f){
+    if(f===0)
+        return 0;
 	if(f)
 	    return parseFloat(f);
     else
     	return null;
 }
+
 
 function getRandomInRange(from, to, fixed) {
     return (Math.random() * (to - from) + from).toFixed(fixed) * 1
@@ -202,7 +210,7 @@ function saveDeviceDefinition(entry) {
 function getDeviceDefinition(id) {
     var params = {
        "query" : "id =\""+ id +"\"",
-       "fields": "country,city,source,locationType,locationSection,physicalEnvironment,sensor,address,long,lat,event_type,id"
+       "fields": "country,city,source,locationType,locationSection,physicalEnvironment,categories,sensor,address,long,lat,event_type,id,timestamp,isSuspended"
    }
    var result = device.query(params);
    if(result.metadata.status == "success") {
@@ -211,6 +219,24 @@ function getDeviceDefinition(id) {
         return null;
    }
 }
+
+function getDevicesDefinition(ids) {
+    if(ids && ids.length>0){
+        var params = {
+           "query": "id IN " + ids ,
+           "fields": "country,city,source,locationType,locationSection,physicalEnvironment,categories,sensor,address,long,lat,event_type,id,timestamp,isSuspended"
+       }
+       var result = device.query(params);
+       if(result.metadata.status == "success") {
+            return result.result.devices;
+       } else {
+            return null;
+       }
+    }else{
+        return null;
+    }
+}
+    
 
 
 function getAllDevicesDefinition() {
@@ -226,4 +252,85 @@ function getAllDevicesDefinition() {
    } else {
         return null;
    }
+}
+
+function getDevicesCount() {
+
+  var params = {
+    "query" : "",//"type =\""+ type +"\"",
+    "count": true
+  }
+
+  var result = device.query(params);
+  if(result.metadata.status == "success") {
+    return result.result.count;
+  } else {
+    return null;
+  }
+}
+
+function getDailyAlertsTotal() {
+
+    var filter = {
+           "query" : "timestamp >= '"+moment().startOf("day").format('YYYY-MM-DD HH:mm:00+00')+"'",
+           "sort":"timestamp DESC",
+           "limit":"500"
+    };
+    var result = alertStore.query(filter);
+    if(result.metadata.status == "success") {
+        return result.result.length;
+    }
+    else
+        return 0
+}
+
+function getAlertsEntries(id, startTime){ 
+   var key = event_prefix;
+   var query = "";
+   if(id){
+     key+=id+"_";
+     query = "id = '"+key+"'"; // prime query with key  
+   }else{
+       // start query empty 
+   }  
+   
+   // if startTime is available check if query was empty or not and append start time
+   if(startTime) {  
+      if(query.length>0){
+          query += " AND "
+      }
+          
+      query += "  timestamp >= '"+startTime+"'";
+   }
+    var filter = {
+           "query" : query,
+           "sort":"timestamp DESC",
+           "limit":"500"
+    };
+    
+   var result = alertStore.query(filter);
+    //return result;
+    
+   if(result.metadata.status == "success" && result.result.length > 0) {
+        return result.result;
+   } else {
+        return null;
+   }
+}
+
+function getAllDeviceLatestPayload(id) {
+  var key = event_prefix + id;
+  var filter = {
+    "query" : "id = '"+key+"'",
+    "fields": "timestamp",
+    "sort":"timestamp DESC",
+    "limit": 1
+  }
+  var result = eventStore.query(filter);
+
+  if(result.metadata.status == "success" && result.result.length > 0) {
+    return result.result;
+  } else {
+    return null;
+  }
 }

@@ -2,42 +2,12 @@
 var deviceManager = require("../entities/deviceManager");
 var utils = require("../entities/utils");
 var query = {};
-if(request.body != null){
-	query = request.body;
-}else if(request.parameters.body){
-	query = request.parameters.body;
-} else {
-  query = request.parameters;
-}
 
-if(typeof query == 'string'){
-  	try{
-    	query = JSON.parse(query);   
-    }catch(e){
-      	return "INVALID OR MISSING PARAMETER";
-    }
-}
-var device = deviceManager.getDeviceDefinition(query.id);
-var entries = deviceManager.getDeviceAlertsEntriesTimescale(query.id);
-var events = deviceManager.getDeviceHistoricalEntriesTimescale(query.id);
-var formattedEvents = {};
-for(var i=0; i<events.length; i++){
-	formattedEvents[events[i].timestamp.time] = {"temperature":events[i].temperature, "humidity":events[i].humidity};
-}
-for(var j=0; j<entries.length; j++){
-	entries[j].country = device["country"];
-    entries[j].city = device["city"];
-    entries[j].locationType = device["locationType"];
-    entries[j].source = device["source"];
-    entries[j].address = device["address"];
-    entries[j].physicalEnvironment = device["physicalEnvironment"];
-    entries[j].sensor = device["sensor"];
-    entries[j].locationSection = device["locationSection"];
-    entries[j].key = entries[j].id;
-    entries[j].id = device["id"];
-    entries[j].temperature = formattedEvents[entries[j].timestamp.time]["temperature"];
-    entries[j].humidity = formattedEvents[entries[j].timestamp.time]["humidity"];
-    entries[j].creationDate = new Date(entries[j].timestamp.time);
-    delete entries[j].timestamp;
-}
-return entries;
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
+if(body.body) body = body.body;
+var query = typeof(body) == "string" ? JSON.parse(body) : body;
+
+//var device = deviceManager.getDeviceDefinition(query.id);
+var alerts = deviceManager.getDeviceAlertsEntriesTimescale(query.id);
+
+return alerts;

@@ -14,11 +14,9 @@
                 <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 
             </div>
         </div>
-        
-      
         <div gridster="vm.gridsterOptions" ng-if="vm.deviceKey != null">
             <ul>
-                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col: 0, row: 0 }' ng-if="vm.latest.temperature">
+                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col: 0, row: 0 }' ng-if="vm.selectedDevice.temperature">
                     <div class="box">
                         <div class="box-header">
 						    <div class="box-label"><span tooltip-append-to-body="true" uib-tooltip="Temperature">Temperature</span></div>
@@ -29,7 +27,7 @@
                                                                                      transport='wss'
                                                                                      boxLabel='Temperature'
                                                                                      msg-tag='{{vm.tag}}'
-                                                                                     gauge-value='vm.selectedDevice.temperature.value'
+                                                                                     gauge-value='vm.selectedDevice.temperature'
                                                                                      api-params='vm.params'                      
                                                                                      value-font-color='#999'
                                                                                      min='-40'
@@ -70,7 +68,7 @@
                         </div>
                     </div>
                 </li>
-                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col: 0, row: 1 }' ng-if="vm.latest.humidity">
+                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col: 0, row: 1 }' ng-if="vm.selectedDevice.humidity">
                     <div class="box">
 						  <div class="box-header">
 						    <div class="box-label"><span tooltip-append-to-body="true" uib-tooltip="Humidity Level">Humidity Level</span></div>
@@ -81,7 +79,7 @@
                                                                                      transport='wss'
                                                                                      boxLabel='Humidity Level'
                                                                                      msg-tag='{{vm.tag}}'
-                                                                                     gauge-value='vm.selectedDevice.humidity.value'
+                                                                                     gauge-value='vm.selectedDevice.humidity'
                                                                                      value-font-color='#999'
                                                                                      min='0'
                                                                                      max='100'
