@@ -1,34 +1,49 @@
 var deviceManager = require("../entities/deviceManager");
-var query = {};
-if(request.body != null){
-	query = request.body;
-}else if(request.parameters.body){
-	query = request.parameters.body;
-} else {
-  query = request.parameters;
-}
+var _ = require("modules/underscore/underscore.js")._;
+var moment = require("modules/momentjs/moment.min.js").moment;
 
-if(typeof query == 'string'){
-  	try{
-    	query = JSON.parse(query);   
-    }catch(e){
-      	return "INVALID OR MISSING PARAMETER";
-    }
-}
+var log = require("log");
+
+var query = {};
+
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
+if(body.body) body = body.body;
+var query = typeof(body) == "string" ? JSON.parse(body) : body;
+
+//var query = {"id":"myDevice"};
+
 var device = deviceManager.getDeviceDefinition(query.id);
 var entries = deviceManager.getDeviceHistoricalEntriesTimescale(query.id);
-for(var j=0; j<entries.length; j++){
-	entries[j].country = device["country"];
-    entries[j].city = device["city"];
-    entries[j].locationType = device["locationType"];
-    entries[j].source = device["source"];
-    entries[j].address = device["address"];
-    entries[j].physicalEnvironment = device["physicalEnvironment"];
-    entries[j].sensor = device["sensor"];
-    entries[j].locationSection = device["locationSection"];
-    entries[j].key = entries[j].id;
-    entries[j].id = device["id"];
-    entries[j].creationDate = new Date(entries[j].timestamp.time);
-    delete entries[j].timestamp;
+
+var sensors =  typeof(query.sensors) == "string" ? [query.sensors] : query.sensors;
+var format = query.format
+
+
+// Code with measurement unit fix and code with sensors ordering
+if(format == "dygraphs") {
+    var formattedData = [];
+    _.each(entries, function(entry){
+        var tmp = [];
+        tmp.push(moment(entry["timestamp"].time).startOf('second').valueOf()) //Round to start of minute
+        log.info(JSON.stringify(sensors));
+        _.each(sensors, function(sensor){
+             var deviceId = entry["id"]
+             var found = _.some(entry, function(value, key){
+                 if(key == sensor) {
+                    var v  = parseFloat(value);
+                   log.info(key + " "+request.user.measureTemp)
+                   tmp.push(v)
+                   log.info(JSON.stringify(tmp))
+                   return true;
+                 } 
+            });
+            if(!found) {
+                tmp.push(null);
+            }
+     	});
+      formattedData.push(tmp);
+	});
+   return formattedData;
+} else {
+    return entries;    
 }
-return entries;

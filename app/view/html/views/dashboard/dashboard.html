@@ -119,7 +119,7 @@
                         </div>
                     </div>
                 </li>
-                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col:0, row:2 }' ng-if="vm.latest.pressure">
+                <li class="myItem" gridster-item='{sizeX: 1, sizeY: 1, col:0, row:2 }' ng-if="vm.selectedDevice.pressure">
                     <div class="box">
                         <div class="box-content">
                             <div  style="height: 30px;" tooltip-placement="bottom" uib-tooltip="Atmospheric Pressure" class="box-label">Atmospheric Pressure</div>
@@ -127,7 +127,7 @@
                                                                                      transport='wss'
                                                                                      boxLabel='Atmospheric Pressure'
                                                                                      msg-tag='{{vm.tag}}'
-                                                                                     gauge-value='vm.selectedDevice.pressure.value'
+                                                                                     gauge-value='vm.selectedDevice.pressure'
                                                                                      value-font-color='rgb(153, 153, 153)'
                                                                                      min='800'
                                                                                      max='1260'

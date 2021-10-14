@@ -144,6 +144,7 @@ function updateDeviceTimestamp(entry, latestTimestamp) {
 
 function saveDeviceEvent(entry) {
     log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
+    var excludedFields = ["timestamp","id","country","city", "source","locationType","locationSection","physicalEnvironment","sensor","address"]
   	var records = [];
     var d = new Date();//(entry.timestamp);
     d.setSeconds(d.getSeconds() + 2);
@@ -151,14 +152,15 @@ function saveDeviceEvent(entry) {
     var fields = {
         "id": (event_prefix + entry.id),
         "timestamp": ts
+//        "long": entry["long"]
     };
     var keys = Object.keys(entry)
     for (var key of keys) {
-        if(key!="timestamp" && key!="id"){
-           fields[key] = entry[key];
+        if( !excludedFields.includes(key)){
+
+           fields[key] = convertFloat(entry[key]);
         }
     }
-    fields["categories"] = [""];
     records.push(fields);
     log.info("[app/entities/devicemanager] saving device result."+JSON.stringify(eventStore.log(records)));
 }
