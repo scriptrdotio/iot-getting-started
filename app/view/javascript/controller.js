@@ -1,3 +1,36 @@
+myApp.controller('dashboardHomeCtrl', function($scope,  wsClient, httpClient, $location, constants, $routeParams) {
+    var vm = this;
+    vm.alertsColDef = [{headerName: "Device Name", field: "name"},{headerName: "Alerts", field: "alert_type",   autoHeight: 'true', cellRenderer: function(params){
+    try {
+      var messages = "";
+      if(typeof params.value == "object" && Array.isArray(params.value)){
+        _.each(params.value, function(alert){
+          var json = JSON.parse(alert);
+          messages += json.message +"<br/>";
+        })
+        return messages +"<br/>";
+      } else {
+        var json = JSON.parse(params.value);
+        return json.message +"<br/>";
+      }
+    } catch(error) {
+      return params.value +"<br/>";
+    }
+  } , cellStyle: {'white-space': 'normal', 'word-break': 'break-all', 'background-color': '#ff9d00'}}];
+    
+  vm.payloadsTimesColDef = [
+    {headerName: "Device Name", field: "name"},
+    {
+      headerName: "Latest Payload",
+      field: "latestPayload",
+      cellRenderer: function(params){
+        return moment(params.value).format(measurementUnits.dateTimeFormatMOMENT(df));
+      }
+    }
+  ];
+    
+})
+
 myApp.controller('mapCtrl', function($location, constants, $routeParams) {
     var vm = this;
     vm.deviceKey = null;
@@ -45,7 +78,10 @@ myApp.controller('searchDevicesCtrl', function($location, headerItemsJson, menuI
     var vm = this;
     vm.apis = constants.apis;
    
-    vm.init = function() {
+    vm.init = function(allPath, defaultPath) {
+        vm.allPath = allPath;
+        vm.defaultPath = defaultPath;
+        console.log(allPath,defaultPath)
          if($routeParams && $routeParams.deviceId) {
              vm.selectedDevice = $routeParams.deviceId;
              vm.params = {"id":  vm.deviceKey }
@@ -61,31 +97,35 @@ myApp.controller('searchDevicesCtrl', function($location, headerItemsJson, menuI
             }
         ];
         for(var i = 0; i < data.length; i++) {
-            vm.tripsData.push({"key": data[i].id, "name": data[i].id})
+            vm.tripsData.push({"key": data[i].id, "name": data[i].name + " (" + data[i].id + ")"});
+            if (vm.selectedDevice == data[i].id)
+                vm.selectedValue = data[i].name + " (" + data[i].id + ")";
         }
         return vm.tripsData;
     }
      
      
      vm.onSelect = function(data){
-         if(data){
-            vm.selectedDevice = data.originalObject;
-            vm.params = {"id": vm.selectedDevice.key}
-        }
          
-        if(vm.selectedDevice.key == "all") {
-            $location.path("/map");
-        } else {
+         if(data!=undefined) {
+          if(data){
+            vm.selectedValue = data.originalObject.name;
+            vm.params = {"id": data.originalObject.key}
+          }
+          if(data.originalObject.key == "all") {
+            $location.path((vm.allPath) ? vm.allPath : vm.defaultPath);
+          } else {
             if($routeParams.deviceId)
-                $route.updateParams({"deviceId": vm.selectedDevice.key});
-        	else 
-            	$location.path($route.current.originalPath + "/deviceId/" + vm.selectedDevice.key);
-        }
-         
-        return data;
+              $route.updateParams({"deviceId": data.originalObject.key});
+            else 
+              $location.path(vm.defaultPath + "/deviceId/" + data.originalObject.key);
+          }
+          $location.search({});
+          return data;
         
+     	}
+         
      }
-     
 });
 
 myApp.controller('notificationCtrl', function(httpClient, constants) {

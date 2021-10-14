@@ -1,0 +1,7 @@
+var deviceManager = require("app/entities/deviceManager")
+var utils = require("app/entities/utils");
+
+var documents = [];
+var count = deviceManager.getDevicesCount();
+
+return {"value":count};

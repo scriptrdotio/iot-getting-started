@@ -1,0 +1,9 @@
+var deviceManager = require("app/entities/deviceManager")
+var utils = require("app/entities/utils");
+
+var documents = [];
+var count = deviceManager.getDailyAlertsTotal();
+
+//return {"value":count};
+return {"value":count};
+
